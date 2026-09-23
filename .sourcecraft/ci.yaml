@@ -1,0 +1,25 @@
+on:
+  pull_request:
+    - workflows: [test-workflow]
+      filter:
+        target_branches: ["main"]
+
+  push:
+    - workflows: [test-workflow]
+      filter:
+        branches: ["main"]
+
+workflows:
+  test-workflow:
+    tasks:
+      - name: test-task
+        cubes:
+          - name: install-deps
+            image: docker.io/library/python:3.12
+            script:
+              - python -m pip install --upgrade pip
+              - pip install -r requirements-dev.txt
+
+          - name: run-tests
+            script:
+              - python -m pytest

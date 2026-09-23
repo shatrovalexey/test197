@@ -1,0 +1,154 @@
+{
+  "info": {
+    "name": "Quote Catalog Service",
+    "description": "Коллекция запросов для Quote Catalog Service. Базовый URL: http://localhost:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Operations",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Проверка здоровья сервиса. Всегда возвращает HTTP 200 {\"status\": \"healthy\"}."
+          }
+        },
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats"]
+            },
+            "description": "Эксплуатационная сводка: served_local, served_from_catalog, catalog_reads, evictions, local, bytes, catalog."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "Set catalog source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"http://catalog.internal:9000\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/catalog/source",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "source"]
+            },
+            "description": "Сохраняет URL источника каталога в глобальную переменную. Ответ 200 {\"source\": \"...\"}."
+          }
+        },
+        {
+          "name": "Add or replace quote (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"author\": \"Марк Аврелий\",\n  \"text\": \"Всё, что мы слышим, — это мнение, а не факт.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/catalog/q-0000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "q-0000001"]
+            },
+            "description": "Добавляет или заменяет одну цитату через витрину (источник LOCAL). author: 1-200 знаков, text: 1-16384 знаков."
+          }
+        },
+        {
+          "name": "Unpublish quote (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalog/q-0000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "q-0000001"]
+            },
+            "description": "Снимает цитату с публикации через витрину. Запись не удаляется. Ответ 200 {\"deleted\": true} или 404 {\"detail\": \"not found\"}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Import",
+      "item": [
+        {
+          "name": "Import snapshot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quotes\": [\n{\"id\": \"q-0000001\", \"author\": \"Марк Аврелий\", \"text\": \"Всё, что мы слышим, — это мнение, а не факт.\", \"tags\": [\"стоицизм\"], \"year\": 170, \"lang\": \"ru\"},\n{\"id\": \"q-0000002\", \"author\": \"Лев Толстой\", \"text\": \"Все счастливые семьи похожи друг на друга.\", \"tags\": [], \"year\": 1877, \"lang\": \"ru\"}\n]}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["import"]
+            },
+            "description": "Потоковый импорт снимка каталога (до 120 МБ). Первая строка '{\"quotes\": [', последняя ']}'. Ответ 200 {\"imported\": N, \"dropped\": M}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reader",
+      "item": [
+        {
+          "name": "Get quote",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotes/q-0000001",
+              "host": ["{{baseUrl}}"],
+              "path": ["quotes", "q-0000001"]
+            },
+            "description": "Чтение цитаты читателем. Ответ 200 содержит заголовок X-Source: LOCAL (из витрины) или CATALOG (из каталога). 404, если цитаты нет ни у витрины, ни в каталоге."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}
